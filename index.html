@@ -11,7 +11,90 @@
     <link rel="stylesheet" href="./assets/css/style.css">
   </head>
   <body>
-      
+    
+    <div class="container m-4">
+        <div class="row">
+          <div class="col-sm-12">
+          </div>    
+        </div>
+    </div>
+    <div class="container">
+      <div class="row mb-4">
+        <div class="col-sm-8">
+              <input placeholder="Your Pitiful Name" class="form-control" type="text" />
+        </div>
+        <div class="col-sm-4">
+            <button class="btn btn-success w-100">Challenge</button>
+        </div>
+      </div>
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div id="playerA" class="card w-100">
+              <div class="card-header">playerA</div>
+              <div class="card-body">
+                  This is where the name of playerA goes
+              </div>
+              <ul class="list-group list-group-flush">
+                  <li class="list-group-item">ROCK</li>
+                  <li class="list-group-item">PAPER</li>
+                  <li class="list-group-item">SCISSORS</li>
+                </ul>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card w-100">
+                <div class="card-header">ROUND RESULTS!</div>
+                <div class="card-body">
+                    results of the round go here, who won?
+                </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+              <div id="playerB" class="card w-100">
+                  <div class="card-header">playerB</div>
+                  <div id="playerName" class="card-body">
+                      This is where the name of playerB goes
+                  </div>
+                  <ul class="list-group list-group-flush">
+                      <li class="list-group-item">ROCK</li>
+                      <li class="list-group-item">PAPER</li>
+                      <li class="list-group-item">SCISSORS</li>
+                    </ul>
+              </div>
+            </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row">
+          <div class="col-sm-4">
+          </div>
+          <div class="col-sm-8">
+              <div class="card w-100 pb-2">
+                  <div class="card-header">SMACK TALK AREA</div>
+                  <div class="card-body">
+                      <textarea id="chatOutput" class="form-control" disabled ></textarea>
+                  </div>
+                  <ul class="list-group list-group-flush">
+                      <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <input placeholder="Enter Smack" class="form-control" type="text" />
+                          </div>
+                          <div class="col-sm-4">
+                              <button class="btn btn-success w-100">TALK</button>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  
+              </div>
+          </div>
+      </div>
+    </div>
+
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script
