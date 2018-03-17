@@ -7,24 +7,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://use.typekit.net/qtl4hnh.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="./assets/css/style.css">
   </head>
   <body>
-    
-    <div class="container m-4">
+    <div class="jumbotron mb-4">
+      <h1 class="display-4">Rock. Paper. Scissors. Only.</h1>
+      <div class="img-wrapper">
+          <img src="http://cdn-images.threadless.com/threadless-shop/products/6181/1272x920design_01.jpg">
+      </div>
+      
+    </div>
+    <div class="container">
         <div class="row">
-          <div class="col-sm-12">
-          </div>    
+            <div id="alertMssg" class="col-sm-12">
+                
+            </div>
         </div>
     </div>
     <div class="container">
       <div class="row mb-4">
         <div class="col-sm-8">
-              <input placeholder="Your Pitiful Name" class="form-control" type="text" />
+              <input id="playerNameInput" placeholder="Your Pitiful Name" class="form-control" type="text" />
         </div>
         <div class="col-sm-4">
-            <button class="btn btn-success w-100">Challenge</button>
+            <button id="addPlayer" class="btn btn-success w-100">CHALLENGE</button>
         </div>
       </div>
       <div class="row mb-4">
@@ -34,7 +42,7 @@
               <div class="card-body">
                   This is where the name of playerA goes
               </div>
-              <ul class="list-group list-group-flush">
+              <ul class="list-group list-group-flush rps-control">
                   <li class="list-group-item">ROCK</li>
                   <li class="list-group-item">PAPER</li>
                   <li class="list-group-item">SCISSORS</li>
@@ -57,7 +65,7 @@
                   <div id="playerName" class="card-body">
                       This is where the name of playerB goes
                   </div>
-                  <ul class="list-group list-group-flush">
+                  <ul class="list-group list-group-flush rps-control">
                       <li class="list-group-item">ROCK</li>
                       <li class="list-group-item">PAPER</li>
                       <li class="list-group-item">SCISSORS</li>
@@ -71,7 +79,7 @@
       <div class="row">
           <div class="col-sm-4">
           </div>
-          <div class="col-sm-8">
+          <div id="smackWrapper" class="col-sm-8">
               <div class="card w-100 pb-2">
                   <div class="card-header">SMACK TALK AREA</div>
                   <div class="card-body">

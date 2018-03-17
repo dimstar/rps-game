@@ -2,13 +2,33 @@ var database = firebase.database();
 
 var RPS = {
     init: function(){
+        
+        RPS.foldUp();
+    },
+    playHand: function(  ){
 
     },
-    submitChoice: function(  ){
-
+    playersLocal: {
+        player0: false,
+        player1: false
     },
-    createPlayer: function( playerName ){
+    makePlayer: function( playerName ){
+        // Set player key, either playerA or playerB
+        var newPlayerKey = ( !this.playersLocal.player0 ) ? 'player0' : ( !this.playersLocal.player1 )  ?  'player1' : false ;
+        this.playersLocal[newPlayerKey] = true;
 
+        if(newPlayerKey){
+            firebase.database().ref('players/' + newPlayerKey).set({
+                name: playerName
+              });
+        }else{
+            RPS.alertUi(`Sorry ${playerName} too many players!`);
+        }
+    },
+    foldUp: function(){
+        $( ".rps-control" ).slideToggle( "slow", function() {
+            // Animation complete.
+          });
     },
     checkRndWinner: function( playerA, playerB){
         var rndWinner = '';
@@ -44,9 +64,24 @@ var RPS = {
         }
 
         return rndWinner;
+    },
+    alertUi: function(mssg){
+        var alertWrapper = $('<div>').attr('class', 'alert alert-warning');
+        alertWrapper.text(mssg);
+        $('#alertMssg').append(alertWrapper);
+        // kill alert
+        setTimeout(function(){ 
+            $('#alertMssg').children('div').remove();
+         }, 3000);
     }
 }
 
 RPS.init();
 
 /** EVENTS */
+
+$('#addPlayer').on('click', function(){
+    var name = $('#playerNameInput');
+    RPS.makePlayer(name.val());
+    name.val('');
+});

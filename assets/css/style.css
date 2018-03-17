@@ -1,9 +1,59 @@
+/*
+#8D8182 (141, 129, 130)
+#613F82 (97, 63, 130)
+#9A8DA9 (154, 141, 169)
+#3F403C (63, 64, 60)
+*/
+
 * {
     border-radius: 0 !important;
+    border-color: rgba( 141, 129, 130, 0.5) !important;
 }
+
+.card-header {
+    background: rgba( 97, 63, 130, 0.5);
+    color: white;
+    text-transform: uppercase;
+}
+
+body {
+    font-family: "futura-pt";
+    letter-spacing: 1px;
+}
+
+.tk-futura-pt {}
+
+.tk-futura-pt-bold {}
 
 #chatOutput {
     height: 200px;
     resize: none;
     background: white;
+}
+
+.jumbotron img {
+    max-width: 100%;
+}
+
+.img-wrapper {
+    height: 320px;
+    overflow: hidden !important;
+    position: relative;
+}
+
+.img-wrapper img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#smackWrapper {
+    /* position: fixed; */
+    /* bottom: 0; */
+    /* transform: translateY(-100%); */
+}
+
+.jumbotron {
+    padding-top: 1em;
 }
