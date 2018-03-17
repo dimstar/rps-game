@@ -57,3 +57,8 @@ body {
 .jumbotron {
     padding-top: 1em;
 }
+
+.card-body {
+    min-height: 120px;
+    text-align: center;
+}

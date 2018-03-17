@@ -4,30 +4,43 @@ var RPS = {
     init: function(){
         
         RPS.foldUp();
-
-        /** EVENTS */
+        RPS.setupInputs();
         RPS.disconnectPlayer();
 
+        var rpsPlayers = firebase.database().ref('players');
+        var rpsPlayerChoice = firebase.database().ref('players/choice');
+        var rpsTurn = firebase.database().ref('turn');
+        firebase.database().ref('turns').set(RPS.currentRound);
+
+        /** EVENTS */
         $('#addPlayer').on('click', function(){
             var name = $('#playerNameInput');
             RPS.makePlayer(name.val());
             name.val('');
         });
 
-        var rpsPlayers = firebase.database().ref('players');
         rpsPlayers.on('value', function(snapshot) {
-        console.log(snapshot.val());
-        RPS.setPlayersLocal(snapshot.val());
-        RPS.startRound();
+            console.log(snapshot.val());
+            RPS.setPlayersLocal( snapshot.val());
+            RPS.startRound( snapshot.val() );
         });
-    },
-    playHand: function(  ){
 
+        rpsPlayerChoice.on('value', function(snapshot){
+            console.log(snapshot.val());
+            RPS.playerTurnStart( snapshot.val() );
+        });
+
+        rpsTurn.on('value', function(snapshot) {
+            console.log( snapshot.val() );
+            // RPS.endRound( snapshot.val() );
+            RPS.startRound( snapshot.val() );
+        });
     },
     playersLocal: {
         player0: false,
         player1: false
     },
+    currentRound: 0,
     currentPlayer: false,
     disconnectPlayer: function(){
         // set the current player first, we just refreshed.
@@ -46,6 +59,7 @@ var RPS = {
         var playerMssg = $('<div>').attr('class', 'alert alert-success');
         playerMssg.text(`Hi ${playerName}, you're ${playerKey}`);
         $('#playerMssg').append(playerMssg);
+        RPS.currentPlayer = playerKey;
         localStorage.setItem(playerKey, playerName);
     },
     getCurrentPlayer: function(){
@@ -71,7 +85,7 @@ var RPS = {
         }
     },
     foldUp: function(){
-        $( ".rps-control" ).slideToggle( "slow", function() {});
+        $( ".rps-control" ).slideUp( "slow", function() {});
     },
     checkRndWinner: function( playerA, playerB){
         var rndWinner = '';
@@ -123,10 +137,12 @@ var RPS = {
         // bind events for clicking
         $('.rps-control li').on('click', function(){
             console.log('choice: ' + $(this).attr('data-choice') + ', player: ' + $(this).attr('data-player'));
+            RPS.playHand( $(this) );
         });
     },
-    setPlayersLocal: function(snapshotVal){
+    setPlayersLocal: function( snapshotVal){
         RPS.loopObect(snapshotVal, false, RPS.setPlayer);
+        
     },
     loopObect: function(theObject, callOnKey = false, callOnBoth = false, callOnElement = false){
         // Do crazy stuff :)
@@ -150,10 +166,45 @@ var RPS = {
     setPlayer: function(playerKey, playerValues){
         $('#' + playerKey + ' .card-header').html(playerValues.name);
         RPS.playersLocal[playerKey] = true;
+        // RPS.startRound();
     },
-    startRound: function(){
-        
+    startRound: function(snapshotVal){
+        if(RPS.playersLocal.player0 && RPS.playersLocal.player1){
+            console.log('begin');
+            RPS.playerTurnStart(snapshotVal);
+            // @todo
+        }
+    },
+    playerTurnStart: function(snapshotVal){
+        RPS.foldUp();
+        // default player0
+        var playersTurn = 'player0';
+        // if player0 already made a choice, allow player1 a turn
+        if( snapshotVal[playersTurn].choice !== null ){
+            playersTurn === 'player1';
+            // if player1 is already submitted, end round
+            if( snapshotVal[playersTurn].choice !== null ){
+                return RPS.endRound();
+            }
+        }
+
+        // check if you're the curent player
+        if(RPS.currentPlayer === playersTurn){
+            $( "#" + playersTurn + " .rps-control" ).slideToggle( "slow", function() {});
+        }
+    },
+    playHand: function( $this){
+        var playerKey = $this.attr('data-player');
+        var inputChoice = $this.attr('data-choice');
+        // set the firebase
+        firebase.database().ref('players/' + playerKey ).update({choice: inputChoice});
+        // var nextPlayer = (playerKey !== 'player0') ? 'player0' : 'player1';
+    },
+    endRound: function(){
+        RPS.currentRound++;
+        firebase.database().ref('turns').set(RPS.currentRound);
     }
+    
 }
 
 RPS.init();
