@@ -7,9 +7,16 @@ var RPS = {
     },
     currentRound: 0,
     currentPlayer: false,
-    currentPlayerChoice: false,
     whosTurn: false,
     currentOpponent: false,
+    roundResult: {
+        winner: false,
+        loser: false
+    },
+    playerChoicesLocal: {
+        player0: false,
+        player1: false
+    },
     init: function(){
         
         RPS.foldUp();
@@ -18,8 +25,8 @@ var RPS = {
 
         var rpsPlayers = firebase.database().ref('players');
         // var rpsPlayerExists = firebase.database().ref(`players/${RPS.currentPlayer}`);
-        var rpsTurn = firebase.database().ref('turn');
-        firebase.database().ref('turns').set(RPS.currentRound);
+        var rpsTurn = firebase.database().ref('gamestate');
+        // firebase.database().ref('turns').set(RPS.currentRound);
 
         /** EVENTS */
         // When user clicks add player button
@@ -38,18 +45,15 @@ var RPS = {
             RPS.startRound( snapshot.val() );
         });
 
-        // when the current player exists in firebase
-        // rpsPlayerExists.on('value', function(snapshot){
-        //     console.log('rpsPlayerExists Output...')
-        //     console.log(snapshot.val());
-        //     RPS.playerTurnStart( snapshot.val() );
-        // });
-
-        rpsTurn.on('value', function(snapshot) {
+        rpsTurn.on('child_changed', function(snapshot) {
             console.log( 'rpsTurn Output...' );
             console.log( snapshot.val() );
-            // RPS.endRound( snapshot.val() );
+            // RPS.checkRoundWinner( snapshot.val() );
             RPS.startRound( snapshot.val() );
+        });
+
+        rpsTurn.on('child_removed', function(snapshot){
+            // destroy the players
         });
     },
     disconnectPlayer: function(){
@@ -77,12 +81,13 @@ var RPS = {
         RPS.loopObject(RPS.playersLocal, RPS.returnStorage);
     },
     setCurrentOpponent: function(playerKey){
+        // debugger;
         // bail if we already have him.
-        if(RPS.currentOpponent) return false;
+        if(RPS.currentOpponent) return;
         // copy the local players object
         var whoIsOpponent = RPS.playersLocal;
         // remove the current player
-        delete whoIsOpponent.playerKey;
+        delete whoIsOpponent[playerKey];
         // whoever is left is the opponenet
         RPS.currentOpponent = RPS.loopObject(whoIsOpponent, RPS.getCurrentOpponent);
     },
@@ -95,7 +100,7 @@ var RPS = {
     },
     makePlayer: function( playerName ){
         // debugger;
-        // Set player key, either playerA or playerB
+        // Set player key, either playerA or player1
         var newPlayerKey = ( !this.playersLocal.player0 ) ? 'player0' : ( !this.playersLocal.player1 )  ?  'player1' : false ;
         this.playersLocal[newPlayerKey] = true;
 
@@ -112,36 +117,46 @@ var RPS = {
     foldUp: function(){
         $( ".rps-control" ).slideUp( "slow", function() {});
     },
-    checkRndWinner: function( playerA, playerB){
+    checkRoundWinner: function( playerA, playerB){
         var rndWinner = '';
         if(playerA === playerB){
             // tie
             console.log("this is a tie");
-            rndWinner = false;
-            
+            // no winner/loser
         }else if (playerA === "r"){
             if(playerB === "p"){
-                console.log("playerB wins");
-                rndWinner = 'playerB';
+                console.log("player1 wins");
+                RPS.roundResult.winner = 'player1';
+                RPS.roundResult.loser = 'player0';
             }else{
-                console.log("playerA wins");
-                rndWinner = 'playerA';
+                console.log("player0 wins");
+                rndWinner = 'player0';
+                RPS.roundResult.winner = 'player0';
+                RPS.roundResult.loser = 'player1';
             }
         }else if(playerA === "p"){
             if(playerB === "r"){
-                console.log("playerA wins");
-                rndWinner = 'palyerA';
+                console.log("player0 wins");
+                rndWinner = 'player0';
+                RPS.roundResult.winner = 'player0';
+                RPS.roundResult.loser = 'player1';
             }else{
-                console.log("playerB wins");
-                rndWinner = 'playerB';
+                console.log("player1 wins");
+                rndWinner = 'player1';
+                RPS.roundResult.winner = 'player1';
+                RPS.roundResult.loser = 'player0';
             }
         }else{
             if(playerB == "r"){
-                console.log("playerB wins");
-                rndWinner = 'playerB';
+                console.log("player1 wins");
+                rndWinner = 'player1';
+                RPS.roundResult.winner = 'player1';
+                RPS.roundResult.loser = 'player0';
             }else{
-                console.log("playerA wins");
-                rndWinner = 'playerA';
+                console.log("player0 wins");
+                rndWinner = 'player0';
+                RPS.roundResult.winner = 'player1';
+                RPS.roundResult.loser = 'player0';
             }
         }
 
@@ -167,7 +182,6 @@ var RPS = {
     },
     setPlayersLocal: function( snapshotVal){
         RPS.loopObject(snapshotVal, false, RPS.setPlayer);
-        
     },
     loopObject: function(theObject, callOnKey = false, callOnBoth = false, callOnElement = false){
         // Do crazy stuff :)
@@ -195,12 +209,20 @@ var RPS = {
         // RPS.startRound();
     },
     startRound: function(snapshotVal){
+        // set whos turn it is
+
         if(RPS.playersLocal.player0 && RPS.playersLocal.player1){
+            // who is your opponenet?
             RPS.setCurrentOpponent( RPS.currentPlayer );
-            console.log('RPS.startRound() begin');
+            RPS.getWhosTurn();
+
+            console.log('RPS.startRound() calling RPS.playerTurnStart()');
+            // otherwise, start the turns!
             RPS.playerTurnStart(snapshotVal);
-            // @todo
+        
         }
+
+        
     },
     playerTurnStart: function(snapshotVal){
         // debugger;
@@ -208,32 +230,50 @@ var RPS = {
         if(snapshotVal === null) return false;
 
         // default player0, this should be dynamic
-        var whosTurn = RPS.currentPlayer;
+        // var whosTurn = RPS.currentPlayer;
 
         // check if you're the curent player
-        if(RPS.currentPlayer === whosTurn){
-            $( "#" + whosTurn + " .rps-control" ).slideToggle( "slow", function() {});
+        if(RPS.currentPlayer === RPS.whosTurn){
+            $( "#" + RPS.whosTurn + " .rps-control" ).slideToggle( "slow", function() {});
         }
 
     },
     getWhosTurn: function (){
-        if( this.currentPlayer === this.whosTurn ){
-            this.whosTurn === this.currentOpponent;
+        if( RPS.currentPlayer === RPS.whosTurn ){
+            RPS.whosTurn = RPS.currentOpponent;
         }else{
-            this.whosTurn === this.currentPlayer;
+            RPS.whosTurn = RPS.currentPlayer;
         }
     },
     playHand: function( $this){
         var playerKey = $this.attr('data-player');
         var inputChoice = $this.attr('data-choice');
         // set the firebase
+        RPS.playerChoicesLocal[playerKey] = inputChoice;
         firebase.database().ref('players/' + playerKey ).update({choice: inputChoice});
-        RPS.currentPlayerChoice = inputChoice;
-        // var nextPlayer = (playerKey !== 'player0') ? 'player0' : 'player1';
+        // Check if we're on the laster player in the turn
+        RPS.foldUp();
     },
     endRound: function(){
+        // advance the round
         RPS.currentRound++;
-        firebase.database().ref('turns').set(RPS.currentRound);
+
+        database.ref('/players').once('value').then(function(snapshot){
+            var players = snapshot.val();
+            // transforms the turnResults
+            RPS.checkRoundWinner(players.player0.choice, players.player1.choice);
+            if( players.player0.wins || players.player1.wins ){
+                firebase.database().ref('players/' + RPS.roundResult.winner ).update({ 
+                    wins: players[RPS.roundResult.winner].wins++
+                });
+                firebase.database().ref('players/' + RPS.roundResult.loser ).update({ 
+                    losses: players[RPS.roundResult.loser].losses++
+                });
+            }
+        });
+        firebase.database().ref('gamestate/turns').set(RPS.currentRound);
+        RPS.roundResult.winner = false;
+        RPS.roundResult.loser = false;
     }
     
 }
