@@ -13,10 +13,7 @@ var RPS = {
         winner: false,
         loser: false
     },
-    playerChoicesLocal: {
-        player0: false,
-        player1: false
-    },
+    playersLocalObj: {},
     init: function(){
         
         RPS.foldUp();
@@ -38,18 +35,19 @@ var RPS = {
 
         // when a players state changes firebase...
         rpsPlayers.on('value', function(snapshot) {
+            RPS.playersLocalObj = snapshot.val();
             console.log('rpsPlayers Output...');
-            console.log(snapshot.val());
-            RPS.setPlayersLocal( snapshot.val());
+            // console.log(RPS.playersLocalObj);
+            RPS.setPlayersLocal( RPS.playersLocalObj );
             // RPS.setLocalChoice(snapshot.val() );
-            RPS.startRound( snapshot.val() );
+            RPS.startRound( RPS.playersLocalObj );
         });
 
         rpsTurn.on('child_changed', function(snapshot) {
             console.log( 'rpsTurn Output...' );
             console.log( snapshot.val() );
             // RPS.checkRoundWinner( snapshot.val() );
-            RPS.startRound( snapshot.val() );
+            // RPS.startRound( snapshot.val() );
         });
 
         rpsTurn.on('child_removed', function(snapshot){
@@ -208,8 +206,13 @@ var RPS = {
         RPS.playersLocal[playerKey] = true;
         // RPS.startRound();
     },
-    startRound: function(snapshotVal){
+    startRound: function(players){
         // set whos turn it is
+
+        $.each(RPS.playersLocalObj, function( playerKey, propVals){
+            console.log(RPS.playersLocalObj[playerKey]);
+            console.log(RPS.playersLocalObj[playerKey].choice);
+        });
 
         if(RPS.playersLocal.player0 && RPS.playersLocal.player1){
             // who is your opponenet?
@@ -218,7 +221,7 @@ var RPS = {
 
             console.log('RPS.startRound() calling RPS.playerTurnStart()');
             // otherwise, start the turns!
-            RPS.playerTurnStart(snapshotVal);
+            RPS.playerTurnStart(players);
         
         }
 
@@ -249,7 +252,7 @@ var RPS = {
         var playerKey = $this.attr('data-player');
         var inputChoice = $this.attr('data-choice');
         // set the firebase
-        RPS.playerChoicesLocal[playerKey] = inputChoice;
+        // RPS.playerChoicesLocal[playerKey] = inputChoice;
         firebase.database().ref('players/' + playerKey ).update({choice: inputChoice});
         // Check if we're on the laster player in the turn
         RPS.foldUp();
